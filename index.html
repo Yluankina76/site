@@ -4,31 +4,42 @@
 <meta charset="UTF-8">
 <title>Финансовый ассистент MVP</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-  body {
-    font-family: 'Roboto', sans-serif;
-    background: #f0f2f5;
-    margin: 0;
-    padding: 20px;
-  }
-  h1, h2, h3 { color: #333; }
-  .container { max-width: 700px; margin: auto; }
-  input, select, button { padding: 8px; margin: 5px 0; font-size: 16px; }
-  button { cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 5px; transition: 0.3s; }
-  button:hover { background: #45a049; }
-  .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s; }
-  .expense-list li { margin: 5px 0; padding: 5px; border-radius: 5px; list-style: none; transition: 0.3s; }
-  .high { color: red; font-weight: bold; }
-  .income { color: green; font-weight: bold; }
-  .progress { background: #ddd; border-radius: 20px; overflow: hidden; margin: 10px 0; }
-  .progress-bar { height: 20px; background: #4CAF50; width: 0; transition: width 0.5s; }
-  .advice { font-style: italic; color: #555; margin-top: 10px; }
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body { font-family: 'Roboto', sans-serif; margin:0; padding:0; background:#f0f2f5; }
+header { background:#4CAF50; color:white; padding:15px; text-align:center; font-size:24px; }
+nav { display:flex; justify-content:center; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+nav button { padding:10px 20px; border:none; background:none; cursor:pointer; font-size:16px; transition:0.3s; }
+nav button.active { border-bottom:3px solid #4CAF50; font-weight:bold; }
+.container { max-width:900px; margin:20px auto; }
+.card { background:white; padding:20px; margin-bottom:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); transition:0.3s; }
+input, select, button { padding:8px; margin:5px 0; font-size:16px; }
+button { cursor:pointer; background:#4CAF50; color:white; border:none; border-radius:5px; transition:0.3s; }
+button:hover { background:#45a049; }
+.expense-list li { margin:5px 0; padding:5px; border-radius:5px; list-style:none; transition:0.3s; }
+.high { color:red; font-weight:bold; }
+.income { color:green; font-weight:bold; }
+.progress { background:#ddd; border-radius:20px; overflow:hidden; margin:10px 0; }
+.progress-bar { height:20px; background:#4CAF50; width:0; transition:width 0.5s; }
+.advice { font-style:italic; color:#555; margin-top:10px; }
+table { width:100%; border-collapse:collapse; }
+th, td { border:1px solid #ddd; padding:8px; text-align:center; border-radius:5px; }
+th { background:#f5f5f5; }
+.day-expense { border-radius:5px; padding:5px; color:white; font-weight:bold; }
 </style>
 </head>
 <body>
-<div class="container">
-<h1>Финансовый ассистент MVP</h1>
+<header>Финансовый ассистент MVP</header>
+<nav>
+<button class="tablink active" onclick="openTab(event,'dashboard')">Дашборд</button>
+<button class="tablink" onclick="openTab(event,'calendar')">Календарь</button>
+<button class="tablink" onclick="openTab(event,'savings')">Сбережения</button>
+</nav>
 
+<div class="container">
+
+<!-- Дашборд -->
+<div id="dashboard" class="tab" style="display:block;">
 <div class="card">
 <h2>Доход</h2>
 <input type="number" id="income" placeholder="Введите доход">
@@ -46,6 +57,15 @@
   <option value="Транспорт">Транспорт</option>
   <option value="Прочее">Прочее</option>
 </select>
+<select id="day">
+  <option value="Пн">Пн</option>
+  <option value="Вт">Вт</option>
+  <option value="Ср">Ср</option>
+  <option value="Чт">Чт</option>
+  <option value="Пт">Пт</option>
+  <option value="Сб">Сб</option>
+  <option value="Вс">Вс</option>
+</select>
 <button onclick="addExpense()">Добавить</button>
 
 <ul id="expenses" class="expense-list"></ul>
@@ -59,71 +79,155 @@
 </div>
 </div>
 
+<!-- Календарь -->
+<div id="calendar" class="tab" style="display:none;">
+<div class="card">
+<h2>Расходы по дням недели</h2>
+<table>
+<tr>
+<th>День</th>
+<th>Сумма</th>
+<th>Категории</th>
+</tr>
+<tr><td>Пн</td><td id="sumMon">0 ₽</td><td id="catMon"></td></tr>
+<tr><td>Вт</td><td id="sumTue">0 ₽</td><td id="catTue"></td></tr>
+<tr><td>Ср</td><td id="sumWed">0 ₽</td><td id="catWed"></td></tr>
+<tr><td>Чт</td><td id="sumThu">0 ₽</td><td id="catThu"></td></tr>
+<tr><td>Пт</td><td id="sumFri">0 ₽</td><td id="catFri"></td></tr>
+<tr><td>Сб</td><td id="sumSat">0 ₽</td><td id="catSat"></td></tr>
+<tr><td>Вс</td><td id="sumSun">0 ₽</td><td id="catSun"></td></tr>
+</table>
+</div>
+</div>
+
+<!-- Сбережения -->
+<div id="savings" class="tab" style="display:none;">
+<div class="card">
+<h2>Рекомендации по расходам и сбережениям</h2>
+<ul id="recommendations"></ul>
+</div>
+</div>
+
+</div>
+
 <script>
 let income = 0;
 let expenses = [];
 
-function addIncome() {
+const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+function openTab(evt, tabName){
+  document.querySelectorAll('.tab').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.tablink').forEach(b=>b.classList.remove('active'));
+  document.getElementById(tabName).style.display='block';
+  evt.currentTarget.classList.add('active');
+}
+
+function addIncome(){
   const inc = parseFloat(document.getElementById('income').value);
-  if (!isNaN(inc)) {
+  if(!isNaN(inc)){
     income = inc;
     document.getElementById('incomeDisplay').innerText = `Доход: ${income} ₽`;
     updateBalance();
     updateAdvice();
+    updateRecommendations();
   }
 }
 
-function addExpense() {
+function addExpense(){
   const amount = parseFloat(document.getElementById('amount').value);
   const category = document.getElementById('category').value;
-  if (!isNaN(amount)) {
-    expenses.push({amount, category});
+  const day = document.getElementById('day').value;
+  if(!isNaN(amount)){
+    expenses.push({amount, category, day});
     renderExpenses();
     updateBalance();
     updateAdvice();
-    document.getElementById('amount').value = '';
+    updateCalendar();
+    updateRecommendations();
+    document.getElementById('amount').value='';
   }
 }
 
-function renderExpenses() {
+function renderExpenses(){
   const ul = document.getElementById('expenses');
-  ul.innerHTML = '';
-  expenses.forEach((exp) => {
+  ul.innerHTML='';
+  expenses.forEach(exp=>{
     const li = document.createElement('li');
-    li.innerText = `${exp.category}: ${exp.amount} ₽`;
-    li.style.background = getCategoryColor(exp.category);
-    if (exp.amount > income * 0.3) li.classList.add('high');
+    li.innerText = `${exp.day} - ${exp.category}: ${exp.amount} ₽`;
+    li.style.background=getCategoryColor(exp.category);
+    if(exp.amount>income*0.3) li.classList.add('high');
     ul.appendChild(li);
   });
 }
 
-function updateBalance() {
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+function updateBalance(){
+  const totalExpenses = expenses.reduce((sum,e)=>sum+e.amount,0);
   const balance = income - totalExpenses;
   document.getElementById('balance').innerText = `Баланс: ${balance} ₽`;
-  const percent = income ? Math.min((totalExpenses / income) * 100, 100) : 0;
-  document.getElementById('balanceBar').style.width = `${percent}%`;
+  const percent = income?Math.min((totalExpenses/income)*100,100):0;
+  document.getElementById('balanceBar').style.width=`${percent}%`;
 }
 
-function updateAdvice() {
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+function updateAdvice(){
+  const totalExpenses = expenses.reduce((sum,e)=>sum+e.amount,0);
   const balance = income - totalExpenses;
-  let advice = '';
-  if (!income) advice = 'Введите доход, чтобы получать советы.';
-  else if (balance < 0) advice = 'Вы потратили больше, чем заработали! Сократите расходы.';
-  else if (balance < income * 0.2) advice = 'Сэкономьте немного больше, чтобы откладывать.';
-  else advice = 'Финансы в порядке! Продолжайте так.';
-  document.getElementById('advice').innerText = advice;
+  let advice='';
+  if(!income) advice='Введите доход, чтобы получать советы.';
+  else if(balance<0) advice='Вы потратили больше, чем заработали! Сократите расходы.';
+  else if(balance<income*0.2) advice='Сэкономьте немного больше, чтобы откладывать.';
+  else advice='Финансы в порядке! Продолжайте так.';
+  document.getElementById('advice').innerText=advice;
 }
 
-function getCategoryColor(category) {
-  switch(category) {
+function getCategoryColor(category){
+  switch(category){
     case 'Еда': return '#ffe0b2';
     case 'Одежда': return '#b3e5fc';
     case 'Развлечения': return '#d1c4e9';
     case 'Транспорт': return '#c8e6c9';
     default: return '#f5f5f5';
   }
+}
+
+// Календарь
+function updateCalendar(){
+  const daySums={Пн:0,Вт:0,Ср:0,Чт:0,Пт:0,Сб:0,Вс:0};
+  const dayCats={Пн:[],Вт:[],Ср:[],Чт:[],Пт:[],Сб:[],Вс:[]};
+  expenses.forEach(e=>{
+    daySums[e.day]+=e.amount;
+    if(!dayCats[e.day].includes(e.category)) dayCats[e.day].push(e.category);
+  });
+  days.forEach(d=>{
+    document.getElementById('sum'+dayName(d)).innerText=`${daySums[d]} ₽`;
+    document.getElementById('cat'+dayName(d)).innerHTML=dayCats[d].map(c=>`<span class="day-expense" style="background:${getCategoryColor(c)}">${c}</span>`).join(' ');
+  });
+}
+
+function dayName(d){
+  switch(d){
+    case 'Пн': return 'Mon';
+    case 'Вт': return 'Tue';
+    case 'Ср': return 'Wed';
+    case 'Чт': return 'Thu';
+    case 'Пт': return 'Fri';
+    case 'Сб': return 'Sat';
+    case 'Вс': return 'Sun';
+  }
+}
+
+// Рекомендации по сбережениям
+function updateRecommendations(){
+  const totalExpenses = expenses.reduce((sum,e)=>sum+e.amount,0);
+  const balance = income - totalExpenses;
+  const saving=income*0.2;
+  const recList = document.getElementById('recommendations');
+  recList.innerHTML=`
+    <li>Обязательные расходы (жильё, еда, транспорт): ~50% дохода</li>
+    <li>Желательные расходы (развлечения, хобби): ~30% дохода</li>
+    <li>Рекомендуемая сумма к сбережению: ${saving} ₽</li>
+    <li>Текущий баланс: ${balance} ₽</li>
+  `;
 }
 </script>
 </body>
