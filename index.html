@@ -4,24 +4,40 @@
 <meta charset="UTF-8">
 <title>Финансовый ассистент MVP</title>
 <style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
-  input, select { margin: 5px; }
-  .expense-list { margin-top: 20px; }
-  .high { color: red; }
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+  body {
+    font-family: 'Roboto', sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+  }
+  h1, h2, h3 { color: #333; }
+  .container { max-width: 700px; margin: auto; }
+  input, select, button { padding: 8px; margin: 5px 0; font-size: 16px; }
+  button { cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 5px; transition: 0.3s; }
+  button:hover { background: #45a049; }
+  .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s; }
+  .expense-list li { margin: 5px 0; padding: 5px; border-radius: 5px; list-style: none; transition: 0.3s; }
+  .high { color: red; font-weight: bold; }
+  .income { color: green; font-weight: bold; }
+  .progress { background: #ddd; border-radius: 20px; overflow: hidden; margin: 10px 0; }
+  .progress-bar { height: 20px; background: #4CAF50; width: 0; transition: width 0.5s; }
+  .advice { font-style: italic; color: #555; margin-top: 10px; }
 </style>
 </head>
 <body>
-
+<div class="container">
 <h1>Финансовый ассистент MVP</h1>
 
-<h2>Ввод дохода</h2>
+<div class="card">
+<h2>Доход</h2>
 <input type="number" id="income" placeholder="Введите доход">
 <button onclick="addIncome()">Сохранить доход</button>
 <p id="incomeDisplay">Доход: 0 ₽</p>
+</div>
 
-<hr>
-
-<h2>Ввод расходов</h2>
+<div class="card">
+<h2>Добавить расход</h2>
 <input type="number" id="amount" placeholder="Сумма">
 <select id="category">
   <option value="Еда">Еда</option>
@@ -30,15 +46,18 @@
   <option value="Транспорт">Транспорт</option>
   <option value="Прочее">Прочее</option>
 </select>
-<button onclick="addExpense()">Добавить расход</button>
+<button onclick="addExpense()">Добавить</button>
 
-<div class="expense-list" id="expenseList">
-  <h3>Список расходов:</h3>
-  <ul id="expenses"></ul>
+<ul id="expenses" class="expense-list"></ul>
 </div>
 
+<div class="card">
 <h2>Баланс</h2>
 <p id="balance">Баланс: 0 ₽</p>
+<div class="progress"><div id="balanceBar" class="progress-bar"></div></div>
+<p class="advice" id="advice">Добавьте доход и расходы, чтобы увидеть советы.</p>
+</div>
+</div>
 
 <script>
 let income = 0;
@@ -50,6 +69,7 @@ function addIncome() {
     income = inc;
     document.getElementById('incomeDisplay').innerText = `Доход: ${income} ₽`;
     updateBalance();
+    updateAdvice();
   }
 }
 
@@ -60,20 +80,19 @@ function addExpense() {
     expenses.push({amount, category});
     renderExpenses();
     updateBalance();
+    updateAdvice();
+    document.getElementById('amount').value = '';
   }
 }
 
 function renderExpenses() {
   const ul = document.getElementById('expenses');
   ul.innerHTML = '';
-  expenses.forEach((exp, index) => {
+  expenses.forEach((exp) => {
     const li = document.createElement('li');
     li.innerText = `${exp.category}: ${exp.amount} ₽`;
-    // Простая логика "лишние" расходы > 30% дохода
-    if (exp.amount > income * 0.3) {
-      li.classList.add('high');
-      li.innerText += ' ⚠️';
-    }
+    li.style.background = getCategoryColor(exp.category);
+    if (exp.amount > income * 0.3) li.classList.add('high');
     ul.appendChild(li);
   });
 }
@@ -82,8 +101,30 @@ function updateBalance() {
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
   const balance = income - totalExpenses;
   document.getElementById('balance').innerText = `Баланс: ${balance} ₽`;
+  const percent = income ? Math.min((totalExpenses / income) * 100, 100) : 0;
+  document.getElementById('balanceBar').style.width = `${percent}%`;
+}
+
+function updateAdvice() {
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const balance = income - totalExpenses;
+  let advice = '';
+  if (!income) advice = 'Введите доход, чтобы получать советы.';
+  else if (balance < 0) advice = 'Вы потратили больше, чем заработали! Сократите расходы.';
+  else if (balance < income * 0.2) advice = 'Сэкономьте немного больше, чтобы откладывать.';
+  else advice = 'Финансы в порядке! Продолжайте так.';
+  document.getElementById('advice').innerText = advice;
+}
+
+function getCategoryColor(category) {
+  switch(category) {
+    case 'Еда': return '#ffe0b2';
+    case 'Одежда': return '#b3e5fc';
+    case 'Развлечения': return '#d1c4e9';
+    case 'Транспорт': return '#c8e6c9';
+    default: return '#f5f5f5';
+  }
 }
 </script>
-
 </body>
 </html>
