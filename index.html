@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Финансовый ассистент MVP</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  input, select { margin: 5px; }
+  .expense-list { margin-top: 20px; }
+  .high { color: red; }
+</style>
+</head>
+<body>
+
+<h1>Финансовый ассистент MVP</h1>
+
+<h2>Ввод дохода</h2>
+<input type="number" id="income" placeholder="Введите доход">
+<button onclick="addIncome()">Сохранить доход</button>
+<p id="incomeDisplay">Доход: 0 ₽</p>
+
+<hr>
+
+<h2>Ввод расходов</h2>
+<input type="number" id="amount" placeholder="Сумма">
+<select id="category">
+  <option value="Еда">Еда</option>
+  <option value="Одежда">Одежда</option>
+  <option value="Развлечения">Развлечения</option>
+  <option value="Транспорт">Транспорт</option>
+  <option value="Прочее">Прочее</option>
+</select>
+<button onclick="addExpense()">Добавить расход</button>
+
+<div class="expense-list" id="expenseList">
+  <h3>Список расходов:</h3>
+  <ul id="expenses"></ul>
+</div>
+
+<h2>Баланс</h2>
+<p id="balance">Баланс: 0 ₽</p>
+
+<script>
+let income = 0;
+let expenses = [];
+
+function addIncome() {
+  const inc = parseFloat(document.getElementById('income').value);
+  if (!isNaN(inc)) {
+    income = inc;
+    document.getElementById('incomeDisplay').innerText = `Доход: ${income} ₽`;
+    updateBalance();
+  }
+}
+
+function addExpense() {
+  const amount = parseFloat(document.getElementById('amount').value);
+  const category = document.getElementById('category').value;
+  if (!isNaN(amount)) {
+    expenses.push({amount, category});
+    renderExpenses();
+    updateBalance();
+  }
+}
+
+function renderExpenses() {
+  const ul = document.getElementById('expenses');
+  ul.innerHTML = '';
+  expenses.forEach((exp, index) => {
+    const li = document.createElement('li');
+    li.innerText = `${exp.category}: ${exp.amount} ₽`;
+    // Простая логика "лишние" расходы > 30% дохода
+    if (exp.amount > income * 0.3) {
+      li.classList.add('high');
+      li.innerText += ' ⚠️';
+    }
+    ul.appendChild(li);
+  });
+}
+
+function updateBalance() {
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const balance = income - totalExpenses;
+  document.getElementById('balance').innerText = `Баланс: ${balance} ₽`;
+}
+</script>
+
+</body>
+</html>
